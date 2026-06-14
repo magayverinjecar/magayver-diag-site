@@ -27,9 +27,14 @@ export default async function CasosPage({
     .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, sintoma, dtc_codes, created_at')
     .order('created_at', { ascending: false })
 
-  if (q) query = query.or(`titulo.ilike.%${q}%,sintoma.ilike.%${q}%,solucao.ilike.%${q}%`)
+  if (q) {
+    const dtc = q.toUpperCase().trim()
+    query = query.or(
+      `titulo.ilike.%${q}%,sintoma.ilike.%${q}%,solucao.ilike.%${q}%,pecas_trocadas.ilike.%${q}%,veiculo_modelo.ilike.%${q}%,dtc_codes.cs.{${dtc}}`
+    )
+  }
   if (sistema) query = query.eq('sistema', sistema)
-  if (marca) query = query.ilike('veiculo_marca', marca)
+  if (marca) query = query.eq('veiculo_marca', marca)
 
   const { data: casos } = await query
 
