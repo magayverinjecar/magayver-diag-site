@@ -28,10 +28,10 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/casos" className="text-blue-200 text-sm hover:text-white">← Voltar</Link>
-          <span className="text-white font-semibold text-sm">Magayver Injecar</span>
+      <header className="bg-blue-600 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href="/casos" className="text-blue-200 text-sm hover:text-white shrink-0">← Voltar</Link>
+          <span className="text-white font-semibold text-sm truncate">Magayver Injecar</span>
         </div>
         {admin && (
           <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <Field label="Sistema" value={caso.sistema} />
             <Field label="Sintoma" value={caso.sintoma} />
           </div>

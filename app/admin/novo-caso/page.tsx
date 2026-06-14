@@ -60,20 +60,20 @@ export default function NovoCasoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-100">
       <header className="bg-blue-600 px-6 py-3 flex items-center gap-4">
         <button onClick={() => router.back()} className="text-blue-200 text-sm hover:text-white">← Voltar</button>
         <span className="text-white font-medium">Novo caso</span>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-3 py-5 w-full">
         <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col gap-5">
 
           <Field label="Título do caso" required>
             <input className={input} value={form.titulo} onChange={e => set('titulo', e.target.value)} placeholder="Ex: Motor apagando em marcha lenta" required />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
             <Field label="Marca" required>
               <select className={input} value={form.veiculo_marca} onChange={e => set('veiculo_marca', e.target.value)} required>
                 <option value="">Selecionar</option>

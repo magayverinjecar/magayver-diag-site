@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
-      <body className="min-h-full bg-gray-100 text-gray-900 antialiased">
+      <body className="min-h-full bg-gray-100 text-gray-900 antialiased overflow-x-hidden">
         {children}
       </body>
     </html>

@@ -51,14 +51,14 @@ export default function FiltrosBusca({ q, marca, sistema }: Props) {
         placeholder="Buscar por sintoma, DTC, veículo..."
         className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none focus:border-blue-500"
       />
-      <div className="flex gap-2">
-        <select value={marca} onChange={onMarcaChange} className="flex-1 border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
+      <div className="grid grid-cols-2 gap-2">
+        <select value={marca} onChange={onMarcaChange} className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
           <option value="">Todas as marcas</option>
           {['VW','GM','Fiat','Ford','Toyota','Honda','Hyundai','Renault','Jeep'].map(m => (
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
-        <select value={sistema} onChange={onSistemaChange} className="flex-1 border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
+        <select value={sistema} onChange={onSistemaChange} className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
           <option value="">Todos os sistemas</option>
           {['Motor','Transmissão','Airbag','ABS','Elétrica'].map(s => (
             <option key={s} value={s}>{s}</option>
