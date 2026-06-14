@@ -23,6 +23,36 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
 
   if (!caso) notFound()
 
+  // Busca casos relacionados: mesmo DTC ou mesmo veículo (excluindo o atual)
+  const dtcs: string[] = caso.dtc_codes ?? []
+  const [{ data: porDtc }, { data: porVeiculo }] = await Promise.all([
+    dtcs.length > 0
+      ? supabase
+          .from('casos')
+          .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, dtc_codes')
+          .filter('dtc_codes', 'ov', `{${dtcs.join(',')}}`)
+          .neq('id', id)
+          .limit(4)
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from('casos')
+      .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, dtc_codes')
+      .eq('veiculo_marca', caso.veiculo_marca)
+      .eq('veiculo_modelo', caso.veiculo_modelo)
+      .neq('id', id)
+      .limit(4),
+  ])
+
+  // Mescla e deduplica, priorizando os de DTC
+  const seenIds = new Set<string>()
+  const relacionados: typeof porDtc = []
+  for (const c of [...(porDtc ?? []), ...(porVeiculo ?? [])]) {
+    if (!seenIds.has(c.id) && relacionados.length < 4) {
+      seenIds.add(c.id)
+      relacionados.push(c)
+    }
+  }
+
   const admin = isAdmin(user.email ?? '')
   const userName = (user.user_metadata?.full_name as string | undefined) ?? ''
 
@@ -107,6 +137,39 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           userName={userName}
           isAdmin={admin}
         />
+
+        {relacionados.length > 0 && (
+          <div className="bg-white border border-gray-300 rounded-lg p-4">
+            <h2 className="text-sm font-semibold text-gray-900 mb-3">Casos relacionados</h2>
+            <div className="flex flex-col divide-y divide-gray-100">
+              {relacionados.map(r => {
+                const dtcsComuns = (r.dtc_codes as string[] ?? []).filter((d: string) => dtcs.includes(d))
+                return (
+                  <Link
+                    key={r.id}
+                    href={`/casos/${r.id}`}
+                    className="py-3 first:pt-0 last:pb-0 flex flex-col gap-1 hover:bg-gray-50 -mx-4 px-4 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-900 leading-snug">{r.titulo}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-gray-500">{r.veiculo_marca} {r.veiculo_modelo} {r.veiculo_ano}</span>
+                      <span className="text-xs text-gray-400">·</span>
+                      <span className="text-xs text-gray-500">{r.sistema}</span>
+                      {dtcsComuns.length > 0 && (
+                        <>
+                          <span className="text-xs text-gray-400">·</span>
+                          {dtcsComuns.map((d: string) => (
+                            <span key={d} className="font-mono text-xs bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded">{d}</span>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )
