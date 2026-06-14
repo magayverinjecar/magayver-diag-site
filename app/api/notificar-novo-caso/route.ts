@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ sent })
 }
 
-async function marcarNotificados(admin: ReturnType<typeof createServiceClient>, ids: string[]) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function marcarNotificados(admin: any, ids: string[]) {
   await admin.from('casos').update({ notificado_em: new Date().toISOString() }).in('id', ids)
 }
