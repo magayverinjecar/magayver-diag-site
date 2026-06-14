@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
+import NotificarLoteButton from '@/app/components/NotificarLoteButton'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -14,6 +15,7 @@ export default async function AdminDashboardPage() {
     { count: totalComentarios },
     { data: casos },
     { data: comentariosRecentes },
+    { data: naoNotificados },
   ] = await Promise.all([
     supabase.from('casos').select('*', { count: 'exact', head: true }),
     supabase.from('comentarios').select('*', { count: 'exact', head: true }),
@@ -23,6 +25,11 @@ export default async function AdminDashboardPage() {
       .select('id, conteudo, created_at, user_email, user_name, caso_id, casos(titulo)')
       .order('created_at', { ascending: false })
       .limit(8),
+    supabase
+      .from('casos')
+      .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema')
+      .is('notificado_em', null)
+      .order('created_at', { ascending: false }),
   ])
 
   // Agrupa por sistema
@@ -87,6 +94,39 @@ export default async function AdminDashboardPage() {
             <p className="text-3xl font-bold text-gray-900">{totalComentarios ?? 0}</p>
           </div>
         </div>
+
+        {/* Casos não notificados */}
+        {(naoNotificados ?? []).length > 0 && (
+          <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+            <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+              <div>
+                <h2 className="text-sm font-semibold text-amber-900">
+                  {naoNotificados!.length} caso{naoNotificados!.length > 1 ? 's' : ''} sem notificação
+                </h2>
+                <p className="text-xs text-amber-700 mt-0.5">Assinantes ainda não foram avisados sobre estes casos</p>
+              </div>
+              <NotificarLoteButton casos={(naoNotificados ?? []).map(c => ({
+                id: c.id,
+                titulo: c.titulo,
+                marca: c.veiculo_marca,
+                modelo: c.veiculo_modelo,
+                ano: c.veiculo_ano ?? '',
+                sistema: c.sistema,
+              }))} />
+            </div>
+            <div className="flex flex-col divide-y divide-amber-200">
+              {(naoNotificados ?? []).slice(0, 5).map(c => (
+                <div key={c.id} className="py-2 first:pt-0 last:pb-0">
+                  <Link href={`/casos/${c.id}`} className="text-xs font-medium text-amber-900 hover:underline">{c.titulo}</Link>
+                  <p className="text-xs text-amber-700">{c.veiculo_marca} {c.veiculo_modelo} · {c.sistema}</p>
+                </div>
+              ))}
+              {(naoNotificados ?? []).length > 5 && (
+                <p className="text-xs text-amber-600 pt-2">+ {naoNotificados!.length - 5} outros casos</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Casos por mês */}
         <div className="bg-white border border-gray-300 rounded-lg p-4">
