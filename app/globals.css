@@ -4,6 +4,13 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
+/* Impede zoom automático do iOS ao focar inputs */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 @media print {
   /* Oculta tudo que não é conteúdo do caso */
   header,
