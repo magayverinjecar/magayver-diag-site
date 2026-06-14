@@ -3,16 +3,11 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-function primeiroNome(email: string): string {
-  const parte = email.split('@')[0]
-  const nome = parte.split(/[._-]/)[0]
-  return nome.charAt(0).toUpperCase() + nome.slice(1)
-}
-
 interface Comentario {
   id: string
   user_id: string
   user_email: string
+  user_name: string | null
   conteudo: string
   created_at: string
 }
@@ -22,10 +17,18 @@ interface Props {
   comentariosIniciais: Comentario[]
   userId: string
   userEmail: string
+  userName: string
   isAdmin: boolean
 }
 
-export default function ComentariosSection({ casoId, comentariosIniciais, userId, userEmail, isAdmin }: Props) {
+function exibirNome(nome: string | null, email: string): string {
+  if (nome && nome.trim().length > 0) return nome.trim().split(' ')[0]
+  const parte = email.split('@')[0]
+  const slug = parte.split(/[._-]/)[0]
+  return slug.charAt(0).toUpperCase() + slug.slice(1)
+}
+
+export default function ComentariosSection({ casoId, comentariosIniciais, userId, userEmail, userName, isAdmin }: Props) {
   const [comentarios, setComentarios] = useState<Comentario[]>(comentariosIniciais)
   const [texto, setTexto] = useState('')
   const [loading, setLoading] = useState(false)
@@ -37,7 +40,13 @@ export default function ComentariosSection({ casoId, comentariosIniciais, userId
     const supabase = createClient()
     const { data, error } = await supabase
       .from('comentarios')
-      .insert({ caso_id: casoId, user_id: userId, user_email: userEmail, conteudo: texto.trim() })
+      .insert({
+        caso_id: casoId,
+        user_id: userId,
+        user_email: userEmail,
+        user_name: userName || null,
+        conteudo: texto.trim(),
+      })
       .select()
       .single()
 
@@ -67,12 +76,14 @@ export default function ComentariosSection({ casoId, comentariosIniciais, userId
         {comentarios.map(c => (
           <div key={c.id} className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-xs font-medium text-blue-600 shrink-0">
-              {primeiroNome(c.user_email).charAt(0).toUpperCase()}
+              {exibirNome(c.user_name, c.user_email).charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 bg-gray-50 rounded-xl px-4 py-3">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-gray-700">{primeiroNome(c.user_email)}</span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {exibirNome(c.user_name, c.user_email)}
+                  </span>
                   <span className="text-xs text-gray-400">{c.user_email}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -80,10 +91,7 @@ export default function ComentariosSection({ casoId, comentariosIniciais, userId
                     {new Date(c.created_at).toLocaleDateString('pt-BR')}
                   </span>
                   {(c.user_id === userId || isAdmin) && (
-                    <button
-                      onClick={() => deletar(c.id)}
-                      className="text-xs text-gray-300 hover:text-red-400 transition-colors"
-                    >
+                    <button onClick={() => deletar(c.id)} className="text-xs text-gray-300 hover:text-red-400 transition-colors">
                       ×
                     </button>
                   )}

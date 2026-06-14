@@ -23,6 +23,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
   if (!caso) notFound()
 
   const admin = isAdmin(user.email ?? '')
+  const userName = (user.user_metadata?.full_name as string | undefined) ?? ''
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -95,6 +96,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           comentariosIniciais={comentarios ?? []}
           userId={user.id}
           userEmail={user.email ?? ''}
+          userName={userName}
           isAdmin={admin}
         />
       </div>
