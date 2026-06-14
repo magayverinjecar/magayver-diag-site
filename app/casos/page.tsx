@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { hasActiveAccess, isAdmin } from '@/lib/check-access'
+import { hasActiveAccess, isAdmin, isColaborador } from '@/lib/check-access'
 import Link from 'next/link'
 import LogoutButton from '@/app/components/LogoutButton'
 import FiltrosBusca from '@/app/components/FiltrosBusca'
@@ -17,7 +17,8 @@ export default async function CasosPage({
 
   if (!user) redirect('/login')
 
-  const access = await hasActiveAccess(supabase, user.id)
+  const email = user.email ?? ''
+  const access = await hasActiveAccess(supabase, user.id, email)
   if (!access) redirect('/login')
 
   const params = await searchParams
@@ -47,7 +48,9 @@ export default async function CasosPage({
 
   const total = count ?? 0
   const totalPaginas = Math.ceil(total / POR_PAGINA)
-  const admin = isAdmin(user.email ?? '')
+  const admin = isAdmin(email)
+  const colab = !admin && await isColaborador(supabase, email)
+  const podeAdicionarCaso = admin || colab
 
   function pageUrl(p: number) {
     const ps = new URLSearchParams()
@@ -72,13 +75,11 @@ export default async function CasosPage({
       <header className="bg-blue-600 px-4 py-3 flex items-center justify-between">
         <span className="text-white font-semibold text-sm">Magayver Injecar <span className="text-blue-200 font-normal">/ Casos</span></span>
         <div className="flex items-center gap-2">
-          {admin && (
-            <>
-              <Link href="/admin" className="text-xs text-blue-200 hover:text-white px-2 py-1.5">Dashboard</Link>
-              <Link href="/admin/novo-caso" className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
-                + Novo caso
-              </Link>
-            </>
+          {admin && <Link href="/admin" className="text-xs text-blue-200 hover:text-white px-2 py-1.5">Dashboard</Link>}
+          {podeAdicionarCaso && (
+            <Link href="/admin/novo-caso" className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
+              + Novo caso
+            </Link>
           )}
           <LogoutButton />
         </div>
