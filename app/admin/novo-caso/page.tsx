@@ -45,16 +45,30 @@ export default function NovoCasoPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error: err } = await supabase.from('casos').insert({
+    const { data: novo, error: err } = await supabase.from('casos').insert({
       ...form,
       dtc_codes: dtcList,
-    })
+    }).select('id').single()
 
-    if (err) {
-      setError('Erro ao salvar: ' + err.message)
+    if (err || !novo) {
+      setError('Erro ao salvar: ' + err?.message)
       setLoading(false)
       return
     }
+
+    // Dispara notificação por e-mail em background (não bloqueia o redirect)
+    fetch('/api/notificar-novo-caso', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: novo.id,
+        titulo: form.titulo,
+        marca: form.veiculo_marca,
+        modelo: form.veiculo_modelo,
+        ano: form.veiculo_ano,
+        sistema: form.sistema,
+      }),
+    }).catch(() => {})
 
     router.push('/casos')
   }
