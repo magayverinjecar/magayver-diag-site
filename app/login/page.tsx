@@ -46,10 +46,9 @@ export default function LoginPage() {
           </svg>
         </div>
 
-        <h1 className="text-xl font-medium text-gray-900 mb-1">Magayver Diag</h1>
-        <p className="text-sm text-gray-500 mb-2">Base de Casos Resolvidos</p>
+        <h1 className="text-xl font-medium text-gray-900 mb-1">Base de Dados da Magayver Injecar</h1>
         <p className="text-xs text-gray-400 leading-relaxed mb-6">
-          Acervo exclusivo de defeitos automotivos já solucionados — organizados por marca, modelo e código DTC. Use o mesmo email e senha do app para entrar.
+          Acervo exclusivo de defeitos automotivos já solucionados — organizado por marca, modelo e código DTC. Atualizado diariamente. Use o mesmo email e senha do app para entrar.
         </p>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
