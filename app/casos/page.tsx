@@ -4,10 +4,12 @@ import { hasActiveAccess, isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
 import LogoutButton from '@/app/components/LogoutButton'
 
+const POR_PAGINA = 20
+
 export default async function CasosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sistema?: string; marca?: string }>
+  searchParams: Promise<{ q?: string; sistema?: string; marca?: string; page?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,11 +23,15 @@ export default async function CasosPage({
   const q = params.q ?? ''
   const sistema = params.sistema ?? ''
   const marca = params.marca ?? ''
+  const page = Math.max(1, parseInt(params.page ?? '1'))
+  const from = (page - 1) * POR_PAGINA
+  const to = from + POR_PAGINA - 1
 
   let query = supabase
     .from('casos')
-    .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, sintoma, dtc_codes, created_at')
+    .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, sintoma, dtc_codes, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   if (q) {
     const dtc = q.toUpperCase().trim()
@@ -36,9 +42,21 @@ export default async function CasosPage({
   if (sistema) query = query.eq('sistema', sistema)
   if (marca) query = query.eq('veiculo_marca', marca)
 
-  const { data: casos } = await query
+  const { data: casos, count } = await query
 
+  const total = count ?? 0
+  const totalPaginas = Math.ceil(total / POR_PAGINA)
   const admin = isAdmin(user.email ?? '')
+
+  function pageUrl(p: number) {
+    const ps = new URLSearchParams()
+    if (q) ps.set('q', q)
+    if (sistema) ps.set('sistema', sistema)
+    if (marca) ps.set('marca', marca)
+    if (p > 1) ps.set('page', String(p))
+    const str = ps.toString()
+    return `/casos${str ? `?${str}` : ''}`
+  }
 
   const sistemaCores: Record<string, string> = {
     Motor:        'bg-blue-100 text-blue-800',
@@ -89,7 +107,10 @@ export default async function CasosPage({
           </div>
         </form>
 
-        <p className="text-xs text-gray-500 mb-3">{casos?.length ?? 0} casos encontrados</p>
+        <p className="text-xs text-gray-500 mb-3">
+          {total} caso{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+          {totalPaginas > 1 && ` · página ${page} de ${totalPaginas}`}
+        </p>
 
         <div className="flex flex-col gap-2">
           {casos?.map(caso => (
@@ -124,6 +145,44 @@ export default async function CasosPage({
             </div>
           )}
         </div>
+
+        {totalPaginas > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6">
+            {page > 1 && (
+              <Link href={pageUrl(page - 1)}
+                className="border border-gray-300 bg-white text-gray-700 text-sm px-4 py-2 rounded hover:border-blue-400 transition-colors">
+                ← Anterior
+              </Link>
+            )}
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPaginas || Math.abs(p - page) <= 1)
+              .reduce<(number | '...')[]>((acc, p, i, arr) => {
+                if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) acc.push('...')
+                acc.push(p)
+                return acc
+              }, [])
+              .map((p, i) =>
+                p === '...' ? (
+                  <span key={`dots-${i}`} className="text-gray-400 text-sm px-1">...</span>
+                ) : (
+                  <Link key={p} href={pageUrl(p as number)}
+                    className={`border text-sm w-9 h-9 flex items-center justify-center rounded transition-colors
+                      ${p === page
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
+                      }`}>
+                    {p}
+                  </Link>
+                )
+              )}
+            {page < totalPaginas && (
+              <Link href={pageUrl(page + 1)}
+                className="border border-gray-300 bg-white text-gray-700 text-sm px-4 py-2 rounded hover:border-blue-400 transition-colors">
+                Próxima →
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </main>
   )
