@@ -46,7 +46,8 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
 
   // Mescla e deduplica, priorizando os de DTC
   const seenIds = new Set<string>()
-  const relacionados: typeof porDtc = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const relacionados: any[] = []
   for (const c of [...(porDtc ?? []), ...(porVeiculo ?? [])]) {
     if (!seenIds.has(c.id) && relacionados.length < 4) {
       seenIds.add(c.id)
