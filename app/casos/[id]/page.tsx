@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { hasActiveAccess, isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
 import ComentariosSection from '@/app/components/ComentariosSection'
+import DeletarCasoButton from '@/app/components/DeletarCasoButton'
 
 export default async function CasoDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -33,9 +34,12 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           <span className="text-white font-semibold text-sm">Magayver Injecar</span>
         </div>
         {admin && (
-          <Link href={`/admin/editar/${id}`} className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
-            Editar caso
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={`/admin/editar/${id}`} className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
+              Editar
+            </Link>
+            <DeletarCasoButton casoId={id} />
+          </div>
         )}
       </header>
 
