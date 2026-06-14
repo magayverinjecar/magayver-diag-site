@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { hasActiveAccess } from '@/lib/check-access'
+import { hasActiveAccess, isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
+import ComentariosSection from '@/app/components/ComentariosSection'
 
 export default async function CasoDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -13,17 +14,31 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
   if (!access) redirect('/login')
 
   const { id } = await params
-  const { data: caso } = await supabase.from('casos').select('*').eq('id', id).single()
+
+  const [{ data: caso }, { data: comentarios }] = await Promise.all([
+    supabase.from('casos').select('*').eq('id', id).single(),
+    supabase.from('comentarios').select('*').eq('caso_id', id).order('created_at', { ascending: true }),
+  ])
+
   if (!caso) notFound()
+
+  const admin = isAdmin(user.email ?? '')
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 px-6 py-3 flex items-center gap-4">
-        <Link href="/casos" className="text-blue-200 text-sm hover:text-white">← Voltar</Link>
-        <span className="text-white font-medium">Magayver Diag</span>
+      <header className="bg-blue-600 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/casos" className="text-blue-200 text-sm hover:text-white">← Voltar</Link>
+          <span className="text-white font-medium">Magayver Diag</span>
+        </div>
+        {admin && (
+          <Link href={`/admin/editar/${id}`} className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-50">
+            Editar caso
+          </Link>
+        )}
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col gap-4">
         <div className="bg-white border border-gray-100 rounded-2xl p-6">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
@@ -46,9 +61,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
             <p className="text-xs text-gray-400 mb-2">Códigos DTC encontrados</p>
             <div className="flex gap-2 flex-wrap">
               {(caso.dtc_codes as string[])?.map(dtc => (
-                <span key={dtc} className="font-mono text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-lg">
-                  {dtc}
-                </span>
+                <span key={dtc} className="font-mono text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-lg">{dtc}</span>
               ))}
             </div>
           </div>
@@ -76,6 +89,14 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
             Cadastrado em {new Date(caso.created_at).toLocaleDateString('pt-BR')}
           </p>
         </div>
+
+        <ComentariosSection
+          casoId={id}
+          comentariosIniciais={comentarios ?? []}
+          userId={user.id}
+          userEmail={user.email ?? ''}
+          isAdmin={admin}
+        />
       </div>
     </main>
   )
