@@ -71,11 +71,14 @@ export default async function CasosPage({
     <main className="min-h-screen bg-gray-100">
       <header className="bg-blue-600 px-4 py-3 flex items-center justify-between">
         <span className="text-white font-semibold text-sm">Magayver Injecar <span className="text-blue-200 font-normal">/ Casos</span></span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {admin && (
-            <Link href="/admin/novo-caso" className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
-              + Novo caso
-            </Link>
+            <>
+              <Link href="/admin" className="text-xs text-blue-200 hover:text-white px-2 py-1.5">Dashboard</Link>
+              <Link href="/admin/novo-caso" className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
+                + Novo caso
+              </Link>
+            </>
           )}
           <LogoutButton />
         </div>

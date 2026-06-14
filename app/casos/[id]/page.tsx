@@ -67,6 +67,8 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
         </div>
         {admin && (
           <div className="flex items-center gap-2">
+            <Link href="/admin" className="text-xs text-blue-200 hover:text-white px-2 py-1.5">Dashboard</Link>
+            <Link href="/admin/novo-caso" className="text-xs text-blue-200 hover:text-white px-2 py-1.5">+ Caso</Link>
             <Link href={`/admin/editar/${id}`} className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded font-semibold">
               Editar
             </Link>
