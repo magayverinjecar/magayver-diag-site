@@ -34,7 +34,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           .filter('dtc_codes', 'ov', `{${dtcs.join(',')}}`)
           .neq('id', id)
           .limit(4)
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [] as { id: string; titulo: string; veiculo_marca: string; veiculo_modelo: string; veiculo_ano: string; sistema: string; dtc_codes: string[] }[] }),
     supabase
       .from('casos')
       .select('id, titulo, veiculo_marca, veiculo_modelo, veiculo_ano, sistema, dtc_codes')
