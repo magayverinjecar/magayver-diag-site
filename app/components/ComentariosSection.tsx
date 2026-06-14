@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+function primeiroNome(email: string): string {
+  const parte = email.split('@')[0]
+  const nome = parte.split(/[._-]/)[0]
+  return nome.charAt(0).toUpperCase() + nome.slice(1)
+}
+
 interface Comentario {
   id: string
   user_id: string
@@ -61,11 +67,14 @@ export default function ComentariosSection({ casoId, comentariosIniciais, userId
         {comentarios.map(c => (
           <div key={c.id} className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-xs font-medium text-blue-600 shrink-0">
-              {c.user_email.charAt(0).toUpperCase()}
+              {primeiroNome(c.user_email).charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 bg-gray-50 rounded-xl px-4 py-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-gray-700">{c.user_email}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-700">{primeiroNome(c.user_email)}</span>
+                  <span className="text-xs text-gray-400">{c.user_email}</span>
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">
                     {new Date(c.created_at).toLocaleDateString('pt-BR')}
