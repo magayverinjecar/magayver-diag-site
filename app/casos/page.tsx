@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveAccess, isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
 import LogoutButton from '@/app/components/LogoutButton'
+import FiltrosBusca from '@/app/components/FiltrosBusca'
 
 const POR_PAGINA = 20
 
@@ -81,31 +82,7 @@ export default async function CasosPage({
       </header>
 
       <div className="max-w-2xl mx-auto px-3 py-5">
-        <form method="GET" className="flex flex-col gap-2 mb-5">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Buscar por sintoma, DTC, veículo..."
-            className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none focus:border-blue-500"
-          />
-          <div className="flex gap-2">
-            <select name="marca" defaultValue={marca} className="flex-1 border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
-              <option value="">Todas as marcas</option>
-              {['VW','GM','Fiat','Ford','Toyota','Honda','Hyundai','Renault','Jeep'].map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-            <select name="sistema" defaultValue={sistema} className="flex-1 border border-gray-300 rounded px-3 py-2.5 text-sm bg-white outline-none">
-              <option value="">Todos os sistemas</option>
-              {['Motor','Transmissão','Airbag','ABS','Elétrica'].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700">
-              Buscar
-            </button>
-          </div>
-        </form>
+        <FiltrosBusca q={q} marca={marca} sistema={sistema} />
 
         <p className="text-xs text-gray-500 mb-3">
           {total} caso{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
