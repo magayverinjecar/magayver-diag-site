@@ -13,6 +13,7 @@ export default function NovoCasoPage() {
   const [error, setError] = useState('')
   const [dtcInput, setDtcInput] = useState('')
   const [dtcList, setDtcList] = useState<string[]>([])
+  const [notificar, setNotificar] = useState(false)
 
   const [form, setForm] = useState({
     titulo: '',
@@ -56,19 +57,20 @@ export default function NovoCasoPage() {
       return
     }
 
-    // Dispara notificação por e-mail em background (não bloqueia o redirect)
-    fetch('/api/notificar-novo-caso', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: novo.id,
-        titulo: form.titulo,
-        marca: form.veiculo_marca,
-        modelo: form.veiculo_modelo,
-        ano: form.veiculo_ano,
-        sistema: form.sistema,
-      }),
-    }).catch(() => {})
+    if (notificar) {
+      fetch('/api/notificar-novo-caso', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: novo.id,
+          titulo: form.titulo,
+          marca: form.veiculo_marca,
+          modelo: form.veiculo_modelo,
+          ano: form.veiculo_ano,
+          sistema: form.sistema,
+        }),
+      }).catch(() => {})
+    }
 
     router.push('/casos')
   }
@@ -154,6 +156,19 @@ export default function NovoCasoPage() {
           </Field>
 
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
+
+          <label className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificar}
+              onChange={e => setNotificar(e.target.checked)}
+              className="w-4 h-4 accent-blue-600"
+            />
+            <div>
+              <p className="text-sm font-medium text-gray-800">Notificar assinantes por e-mail</p>
+              <p className="text-xs text-gray-500">Desmarque ao adicionar vários casos de uma vez</p>
+            </div>
+          </label>
 
           <button
             type="submit"
