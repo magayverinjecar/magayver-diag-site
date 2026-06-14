@@ -4,6 +4,7 @@ import { hasActiveAccess, isAdmin } from '@/lib/check-access'
 import Link from 'next/link'
 import ComentariosSection from '@/app/components/ComentariosSection'
 import DeletarCasoButton from '@/app/components/DeletarCasoButton'
+import ExportarPdfButton from '@/app/components/ExportarPdfButton'
 
 export default async function CasoDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -74,7 +75,13 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
       </header>
 
       <div className="max-w-2xl mx-auto px-3 py-5 flex flex-col gap-3">
-        <div className="bg-white border border-gray-300 rounded-lg p-5">
+        {/* Cabeçalho visível apenas no PDF */}
+        <div data-print="header" className="hidden">
+          <p className="text-lg font-bold text-blue-700">Magayver Injecar</p>
+          <p className="text-xs text-gray-500">Base de Dados de Defeitos Automotivos Resolvidos</p>
+        </div>
+
+        <div data-print="caso" className="bg-white border border-gray-300 rounded-lg p-5">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h1 className="text-base font-semibold text-gray-900 leading-snug">{caso.titulo}</h1>
@@ -82,9 +89,12 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
                 {caso.veiculo_marca} {caso.veiculo_modelo} {caso.veiculo_ano} · {caso.veiculo_versao}
               </p>
             </div>
-            <span className="text-xs bg-green-100 text-green-800 border border-green-200 px-2 py-1 rounded font-medium shrink-0">
-              Resolvido
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <ExportarPdfButton />
+              <span className="text-xs bg-green-100 text-green-800 border border-green-200 px-2 py-1 rounded font-medium">
+                Resolvido
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -129,6 +139,7 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           </p>
         </div>
 
+        <div data-print="hide">
         <ComentariosSection
           casoId={id}
           comentariosIniciais={comentarios ?? []}
@@ -137,9 +148,10 @@ export default async function CasoDetailPage({ params }: { params: Promise<{ id:
           userName={userName}
           isAdmin={admin}
         />
+        </div>
 
         {relacionados.length > 0 && (
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
+          <div data-print="hide" className="bg-white border border-gray-300 rounded-lg p-4">
             <h2 className="text-sm font-semibold text-gray-900 mb-3">Casos relacionados</h2>
             <div className="flex flex-col divide-y divide-gray-100">
               {relacionados.map(r => {

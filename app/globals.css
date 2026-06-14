@@ -3,3 +3,46 @@
 body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
+
+@media print {
+  /* Oculta tudo que não é conteúdo do caso */
+  header,
+  [data-print="hide"],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    min-height: unset !important;
+    background: white !important;
+  }
+
+  /* Cabeçalho do PDF */
+  [data-print="header"] {
+    display: block !important;
+    border-bottom: 2px solid #1d4ed8;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  /* Remove bordas e sombras do card */
+  [data-print="caso"] {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* Evita quebra de página dentro de blocos importantes */
+  [data-print="caso"] > * {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 20mm 15mm;
+  }
+}
